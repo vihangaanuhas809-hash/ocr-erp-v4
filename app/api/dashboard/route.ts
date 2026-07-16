@@ -22,8 +22,10 @@ export async function GET() {
       _sum: { amount: true },
     }),
     prisma.payroll.aggregate({
-      _sum: { total: true },
-    }),
+  _sum: {
+    totalSalary: true,
+  },
+}),
     prisma.material.count(),
     prisma.stockTransaction.count(),
   ]);
