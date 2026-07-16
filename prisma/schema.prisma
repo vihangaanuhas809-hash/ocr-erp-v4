@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Employee {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String?
+  position  String
+  salary    Float
+  createdAt DateTime @default(now())
+
+  attendances     Attendance[]
+  payrolls        Payroll[]
+  advances        Advance[]
+  siteAllocations SiteAllocation[]
+
+  projectId Int?
+  project   Project? @relation("EmployeeProject", fields: [projectId], references: [id])
+}
+
+model Client {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  createdAt DateTime @default(now())
+
+  projects Project[]
+}
+
+model Project {
+  id            Int       @id @default(autoincrement())
+  name          String
+  location      String
+  contractValue Float
+  status        String    @default("Pending")
+  progress      Int       @default(0)
+  startDate     DateTime?
+  endDate       DateTime?
+  createdAt     DateTime  @default(now())
+
+  clientId Int
+  client   Client @relation(fields: [clientId], references: [id])
+
+  expenses        Expense[]
+  payments        Payment[]
+  boqs            Boq[]
+  materials       Material[]
+  siteAllocations SiteAllocation[]
+  employees       Employee[]       @relation("EmployeeProject")
+  attendance      Attendance[]     @relation("AttendanceProject")
+}
+
+model Expense {
+  id          Int      @id @default(autoincrement())
+  title       String
+  category    String
+  amount      Float
+  description String?
+  expenseDate DateTime @default(now())
+
+  projectId Int?
+  project   Project? @relation(fields: [projectId], references: [id])
+}
+
+model Payment {
+  id          Int      @id @default(autoincrement())
+  amount      Float
+  paymentDate DateTime @default(now())
+  method      String?
+
+  projectId Int
+  project   Project @relation(fields: [projectId], references: [id])
+}
+
+model Attendance {
+  id Int @id @default(autoincrement())
+
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  date     DateTime @default(now())
+  status   String
+  overtime Float    @default(0)
+
+  createdAt DateTime @default(now())
+
+  projectId Int?
+  project   Project? @relation("AttendanceProject", fields: [projectId], references: [id])
+}
+
+model Payroll {
+  id         Int      @id @default(autoincrement())
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  month       String
+  basicSalary Float
+  overtime    Float
+  advance     Float  @default(0)
+  totalSalary Float
+
+  createdAt DateTime @default(now())
+}
+
+model Boq {
+  id Int @id @default(autoincrement())
+
+  item     String
+  quantity Float
+  unit     String
+  rate     Float
+  amount   Float
+
+  projectId Int
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model Material {
+  id Int @id @default(autoincrement())
+
+  name      String
+  unit      String
+  quantity  Float
+  unitPrice Float
+
+  projectId Int
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  transactions StockTransaction[]
+
+  createdAt DateTime @default(now())
+}
+
+model StockTransaction {
+  id Int @id @default(autoincrement())
+
+  materialId Int
+  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  type     String // IN or OUT
+  quantity Float
+
+  note      String?
+  createdAt DateTime @default(now())
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now())
+}
+
+model Advance {
+  id Int @id @default(autoincrement())
+
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  amount Float
+  reason String?
+  date   DateTime @default(now())
+
+  createdAt DateTime @default(now())
+}
+
+model SiteAllocation {
+  id Int @id @default(autoincrement())
+
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  projectId Int
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  workDate DateTime
+
+  createdAt DateTime @default(now())
+}
