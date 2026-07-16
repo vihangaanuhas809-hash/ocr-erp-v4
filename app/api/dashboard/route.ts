@@ -36,7 +36,7 @@ export async function GET() {
     clients,
     totalExpenses: expenses._sum.amount ?? 0,
     totalPayments: payments._sum.amount ?? 0,
-    totalPayroll: payroll._sum.total ?? 0,
+    totalPayroll: payroll._sum.totalsalary ?? 0,
     materials,
     stockTransactions: stock,
   });
