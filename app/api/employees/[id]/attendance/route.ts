@@ -14,10 +14,9 @@ export async function GET(
   });
 
   const totalOT = attendance.reduce(
-    (sum, item) => sum + item.otHours,
-    0
-  );
-
+  (sum, item) => sum + item.overtime,
+  0
+);
   return NextResponse.json({
     totalOT,
   });
